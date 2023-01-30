@@ -1,0 +1,260 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js'></script>
+  <script src="d3.js"></script>
+  <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
+  <title>graph</title>
+</head>
+
+<body>
+  <!-- <script>
+  const[toggle,setToggle] =useState(false);
+</script> -->
+
+  <div class="container">
+    <div class="row">
+      <div class="column1">
+        <p class="headingMain">World Viewer</p>
+        <p class="desc1">View the world through the lens of data</p>
+      </div>
+      <div class="column">
+        <img class="logo" src="logo.png" alt="img" >
+      </div>
+
+    </div>
+    <div class="column4">
+      <hr>
+    </div>
+
+    <div class="row2">
+      <div class="column2">
+        <p class="desc2">Group nations based on one or several indices. This uses a
+          Unsupervised Machine Learning algorithm called K-Means which
+          finds patterns in data groups them in an intelligent manner.
+          <br />
+          <br />
+          Combination of different indices gives a different view of the world.
+          Select one or more indicators below and watch the clusters and patterns emerge
+        </p>
+        <br />
+
+        <p class="desc3">How do you want to group the countries?</p>
+        <div class="">
+
+          <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o1" />
+            <label for="o1" class="radioStyle">Population</label>
+          </div>
+
+          <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o2" />
+            <label for="o2" class="radioStyle">Area</label>
+            </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o3" />
+            <label for="o3" class="radioStyle">GINI Index</label>
+            </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o4" />
+            <label for="o4" class="radioStyle">Happy Planet Index</label>
+            </div>
+            <div class="box ">
+              <input type="checkbox" class="checkbox-round" id="o4_" />
+              <label for="o4_" class="radioStyle">Human Development Index</label>
+              </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o5" />
+            <label for="o5" class="radioStyle">Sustainable Economic Interface</label>
+            </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o6" />
+            <label for="o6" class="radioStyle">GDP ($Billion)</label>
+            </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o7" />
+            <label for="o7" class="radioStyle">GDP Per Capita</label>
+            </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o8" />
+            <label for="o8" class="radioStyle">Health Expense (% of GDP)</label>
+            </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o9" />
+            <label for="o9" class="radioStyle">Education Expense (% of GDP)</label>
+            </div>
+
+            <div class="box ">
+              <input type="checkbox" class="checkbox-round" id="o9_" />
+              <label for="o9_" class="radioStyle">Government Effectiveness</label>
+              </div>
+            
+            <div class="box ">
+            <input type="checkbox" class="checkbox-round" id="o10" />
+            <label for="o10" class="radioStyle">Military Spending</label>
+            </div>
+          <div class="bottomBox">
+            <!-- <svg></svg> -->
+            <p class="desc2">Radius by: Population</p>
+            <p class="desc2">Source: The world data visualization prize</p>
+            <p class="desc2">Created by: Noufal kvsnoufal@gmail.com</p>
+          </div>
+
+          <!-- <button id="myBtn">Open Modal</button> -->
+          <div id="tooltip"></div>
+          <div id="tooltipMain"></div>
+
+
+          <div id="myModal" class="modal">
+
+
+            <div class="modal-content">
+              <div class="modalContent1">
+                <p class="modalHeading" id="modalHeading">United Arab Emirates</p>
+                <span class="close">&times;</span>
+              </div>
+              <div class="modalContent2">
+                <div class="modalLeftContainer">
+                  <!-- <img src="./image2.png" alt="img" class="modalImgStyle"> -->
+                </div>
+                <div class="modalRightContainer">
+                  <div class="modalRightContainerTitle">
+                    Cluster Properties
+                  </div>
+                  <br>
+                  <br>
+                  <!-- <ul class="modalRightContainerDesc">
+                    <li> Countries: 32</li>
+                    <li>Average Population: 152000 sqm</li>
+                    <li>Average Area: 1321321132 pm</li>
+                    <li>Average Population: 152000 sqm</li>
+                    <li>Average Area: 1321321132 pm</li>
+                    <li>Average Population: 152000 sqm</li>
+                    <li>Average Population: 152000 sqm</li>
+                    <li>Average Area: 1321321132 pm</li>
+                    <li>Average Population: 152000 sqm</li>
+                    <li>Average Area: 1321321132 pm</li>
+                    <li>Average Population: 152000 sqm</li>
+                    <li>Average Area: 1321321132 pm</li>
+                    <li>Average Population: 152000 sqm</li>
+                  </ul> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="column3">
+        <div class="firstElement">
+          <div class="info">
+            <p class="desc2">Select indices to group countries</p>
+            <p class="desc2">Click on a country for comparison</p>
+          </div>
+          <div class="dropdownMenus">
+            <div class="dropdownMenu">
+              <p class="desc5">Highlight Country</p>
+              <select id="myList1" onchange="Country()">
+                <!-- <option> United Arab Emirates </option>
+                <option> United States Of America </option>
+                <option> India </option>
+                <option> Australia </option>
+                <option> United Kingdom </option> -->
+              </select>
+            </div>
+            <!-- <div class="dropdownMenu">
+              <p class="desc5">Insight For</p>
+              <select id="myList2" onchange="Insight()">
+                <option> United Arab Emirates </option>
+                <option> United States Of America </option>
+                <option> India </option>
+                <option> Australia </option>
+                <option> United Kingdom </option>
+              </select>
+            </div> -->
+          </div>
+
+        </div>
+
+        <div class="secondElement">
+          <!-- <img src="image2.png" alt="img" class="ImgStyle"> -->
+          <div id="vis" class="ImgStyle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    // var modal = document.getElementById("myModal");
+    // var btn = document.getElementById("myBtn");
+    // var span = document.getElementsByClassName("close")[0];
+    // btn.onclick = function () {
+    //   modal.style.display = "block";
+    // }
+    // span.onclick = function () {
+    //   modal.style.display = "none";
+    // }
+    // window.onclick = function (event) {
+    //   if (event.target == modal) {
+    //     modal.style.display = "none";
+    //   }
+    // }
+  </script>
+  <script>
+    function Country() {
+      // var mylist1 = document.getElementById("myList1");
+     
+    }
+  </script>
+
+<script>
+  function Insight() {
+    var mylist2 = document.getElementById("myList2");
+   
+  }
+</script>
+
+  <script src="script.js"></script>
+  <!-- <script src="kmeans.js"></script> -->
+
+  <!-- <div class="EntireBox">
+    <div class="leftBox">
+      <button id="testButton">Button</button>
+      <div class="">
+          <div class="box round">
+            <input id="one" type="radio" >
+          
+            <label for="one" >Population</label>
+          </div>
+          <div class="box">
+            <input id="two" type="checkbox">
+          
+            <label for="two">Area</label>
+          </div>
+      </div>
+
+    </div>
+    <div class="rightBox">
+
+    
+    </div>
+   
+  </div> -->
+  <!-- <div id="vis"></div> -->
+  <!-- <span class="check"></span> -->
+</body>
+
+</html>
