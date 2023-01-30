@@ -225,18 +225,21 @@ const height = 800 - margin.top - margin.bottom
 // console.log(kmeans(testData,2))
 
 let dataset
-let popScale,countryColor
+let popScale
 let simulation,nodes,nodeTexts
+let projectionStretchY ,projectionMargin ,projection 
+let stepSize,step,colorX,colorY
 // let testButton,testToggle,testCheckBox,testCheckBox2,closeButton
 let checkBox1,checkBox2,checkBox3,checkBox4,checkBox5,checkBox6,checkBox7,checkBox8,checkBox9,checkBox10
+let formatValue = d3.format(".2s");
 
 let foci = [
-    {x:width/4,y:height/7},
-    {x:width/4,y:height/7*2},
-    {x:width/4,y:height/7*3},
-    {x:width/4,y:height/7*4},
-    {x:width/4,y:height/7*5},
-    {x:width/4,y:height/7*6},
+    {x:width/2,y:height/7},
+    {x:width/2,y:height/7*2},
+    {x:width/2,y:height/7*3},
+    {x:width/2,y:height/7*4},
+    {x:width/2,y:height/7*5},
+    {x:width/2,y:height/7*6},
 ]
 let allFeatures, clusterFeats
 let mouseovery,mouseoverx
@@ -260,9 +263,9 @@ shortenFeatsMapping = {'Population':'Population',
 'SEDA':'Sustainable Economic Ddevelopment Assessment (SEDA)',
 'GDP ':'GDP ($ USD billions PPP)',
 'GDP per capita ':'GDP per capita in $ (PPP)',
-'Health Expenditure':'Health Expenditure (% of GDP)',
-'Education Expenditure':'Education Expenditure (% of GDP)',
-'Government Effectiveness':'Government Effectiveness',
+'Health Expense':'Health Expenditure (% of GDP)',
+'Education Expense':'Education Expenditure (% of GDP)',
+'Gov Effectiveness':'Government Effectiveness',
 'Military Spending ':'Military Spending (% of GDP)',}
 shortenFeatsReverse = {'Population':'Population',
 'Area':'Area',
@@ -272,9 +275,9 @@ shortenFeatsReverse = {'Population':'Population',
 'Sustainable Economic Ddevelopment Assessment (SEDA)':'SEDA',
 'GDP ($ USD billions PPP)':'GDP ',
 'GDP per capita in $ (PPP)':'GDP per capita ',
-'Health Expenditure (% of GDP)':'Health Expenditure',
-'Education Expenditure (% of GDP)':'Education Expenditure',
-'Government Effectiveness':'Government Effectiveness',
+'Health Expenditure (% of GDP)':'Health Expense',
+'Education Expenditure (% of GDP)':'Education Expense',
+'Government Effectiveness':'Gov Effectiveness',
 'Military Spending (% of GDP)':'Military Spending ',}
 clusterFeats = []
 
@@ -406,13 +409,37 @@ d3.csv("data_processed_v1.csv").then(function(data) {
     dataset = data
     // console.log(dataset[155]);
     popScale= d3.scaleSqrt()
-                .domain([d3.min(dataset.map((d)=>d.Population)),
-                    d3.max(dataset.map((d)=>d.Population))])
-                .range([8,12])
+                .domain([d3.min(dataset.map((d)=>parseInt(d.Area))),
+                    d3.max(dataset.map((d)=>parseInt(d.Area)))])
+                .range([8,15])
+    // countryColor = d3.scaleOrdinal(d3.schemeTableau10)
+    // .domain(dataset.map((d)=>d.Country).values());
+    projectionStretchY = 0.25
+    projectionMargin = 12
+    projection = d3.geoEquirectangular()
+            .scale((width / 4 - projectionMargin) / Math.PI)
+            .translate([width / 4, height* (1 - projectionStretchY )/ 2]);
+    // stepSize = 12
+    // size = 174
+    // newdataset= []
+    // dataset = dataset.map((d)=>{
+    //   var node = d
+    //   var p = projection([d.longitude, d.latitude])
+    //   node["longitudeProj"] = p[0]
+    //   node["latitudeProj"] = p[1]
+    //   newdataset.push(node)
+    // })
+    // dataset = newdataset
+    // colorX = d3.scaleLinear()
+    //   .domain([d3.min(dataset.map((d)=>d.longitudeProj)), d3.max(dataset.map((d)=>d.longitudeProj))])
+    //   .range(['#FFF6EA', '#FD8B3C']);
+    // colorY = d3.scaleLinear()
+    //   .domain([d3.min(dataset.map((d)=>d.latitudeProj)), d3.max(dataset.map((d)=>d.latitudeProj))])
+    //   .range(['#FFF6EA', '#68A4CC']);
+      
     countryColor = d3.scaleOrdinal(d3.schemeTableau10)
-    .domain(dataset.map((d)=>d.Country).values());
-    // drawInit()
-    // drawInit();
+      .domain(dataset.map((d)=>d.Country).values());
+    
     setTimeout(drawInit(), 100)
     
     // console.log("done")
@@ -420,6 +447,17 @@ d3.csv("data_processed_v1.csv").then(function(data) {
   });
 
 function drawInit(){
+  // function countryColor(d){
+  //   var color = d3.scaleLinear()
+  //       .domain([-1,1])
+  //       .range([colorX(d.longitudeProj), colorY(d.latitudeProj)])
+  //       .interpolate(d3.interpolateLab);
+
+  //     var strength = (colorY(d.latitudeProj) - colorX(d.longitudeProj)) / (size-1);
+  //     // console.log(colorY(d.latitudeProj) , colorX(d.longitudeProj))
+  //     // console.log(d3.interpolateLab(colorY(d.latitudeProj),colorX(d.longitudeProj))(0.5))
+  //     return d3.interpolateRgb(colorY(d.latitudeProj),colorX(d.longitudeProj))(0.5)
+  // }
   newdataset = []
     dataset.map((d)=>{
       d['kgroup']=0
@@ -427,11 +465,11 @@ function drawInit(){
     })
     dataset=newdataset
     let svg = d3.select("#vis")
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height)
-    .attr('opacity', 1)
-    .style("background", "#FFFCF6")
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('opacity', 1)
+            .style("background", "#FFFCF6")
     // .attr("background-color",'black')
 
     simulation = d3.forceSimulation(dataset)
@@ -454,13 +492,14 @@ function drawInit(){
         .enter()
         .append('circle')
             .attr('fill', (d)=>countryColor(d.Country))
-            .attr('opacity', 1)
-            .attr('cx', (d, i) => width/32)
-            .attr('cy', (d, i) => height/2)
-            // .attr('r', (d)=>0)
-            // .transition().delay(100)
-            .attr('r', (d)=>popScale(d.Population))
+            .attr('opacity', 0.8)
+            .attr('cx', (d, i) => projection([d.longitude, d.latitude])[0])
+            .attr('cy', (d, i) => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY))
             .attr('id',(d)=>d['code'])
+            // .attr('r', (d)=>1)
+            // .transition().delay(2000)
+            .attr('r', (d)=>popScale(parseInt(d.Area)))
+
     nodeTexts = svg
             .selectAll('text')
             .data(dataset)
@@ -472,14 +511,14 @@ function drawInit(){
                 .attr('fill','#352F44')
                 .attr('font-family','Inter')
                 .style("text-anchor", "middle")
-                .attr('x', (d, i) => width/32)
-                .attr('y', (d, i) => height/2)   
+                .attr('x', (d, i) => projection([d.longitude, d.latitude])[0])
+                .attr('y', (d, i) => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY))   
     
     simulation  
-            .force('charge', d3.forceManyBody().strength([5]))
-            .force('forceX', d3.forceX(d => width/4).strength([0.6]))
-            .force('forceY', d3.forceY(d => height/2).strength(0.04))
-            .force('collide', d3.forceCollide(d => popScale(d.Population) + 2)).tick(100)
+            .force('charge', d3.forceManyBody().strength([0.1]))
+            .force('forceX', d3.forceX(d =>projection([d.longitude, d.latitude])[0]).strength([0.6]))
+            .force('forceY', d3.forceY(d => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY) ).strength(0.04))
+            .force('collide', d3.forceCollide(d => popScale(parseInt(d.Area)))).tick(100)
             .alphaDecay([0.05])
     
         //Reheat simulation and restart
@@ -586,7 +625,7 @@ function drawInit(){
                             .append("table")
                             .style("border-collapse", "collapse")
                             .style("border", "2px #F1D46D solid");
-                            rightBlock.append("thead").append("tr")
+            rightBlock.append("thead").append("tr")
                             .selectAll("th")
                             .data(["Property","Value","Cluster Mean"])
                             .enter().append("th")
@@ -604,8 +643,8 @@ function drawInit(){
                             .enter().append("tr")
                             .selectAll("td")
                             .data(function(ft){return [ft, 
-                              d[shortenFeatsMapping[ft]],
-                              parseInt(d3.mean(gdataset.map((d_)=>parseFloat(d_[shortenFeatsMapping[ft]]))))
+                              formatValue(d[shortenFeatsMapping[ft]]),
+                              formatValue(d3.mean(gdataset.map((d_)=>parseFloat(d_[shortenFeatsMapping[ft]]))))
                             ];})
                             .enter().append("td")
                             .style("border", "1px #F1D46D white")
@@ -656,7 +695,7 @@ function drawInit(){
           .style('top', (d3.event.pageY - 25) + 'px')
           .style('display', 'inline-block')
           .style("background", "#FFFCF6")
-          .html(`<strong>${d.Country}</strong>`)
+          .html(`${d.Country}`)
 
 
 
@@ -715,115 +754,158 @@ function getReportingMetric(){
   return clusterFeats[0]
 }
 function draw1Alt(){
-    let dataToCluster   = dataset.map((d)=>{
-        let arr = []
-        clusterFeats.map((col)=>{
-          arr.push(d["sc_"+col])
-        })
-        
-        return arr
-    })
-    let kmeansResult = kmeans(dataToCluster,6)
-    
-    for (var key in kmeansResult.clusters){
-        // console.log( key, kmeansResult.clusters[key].pointIndices );
-        for (let i = 0; i < kmeansResult.clusters[key].pointIndices.length; i++) {
-            dataset[kmeansResult.clusters[key].pointIndices[i]]["kgroup"] = parseInt(key)
-          }
-      }
-    
-    var reportingMetric = getReportingMetric()
-    let sortable = []
-    d3.set(dataset.map((d)=>d.kgroup)).values().map((d,i)=>{
-      // console.log(d,i)
-      // console.log(d,dataset.filter((d_)=>d_.kgroup===d).length);
-      sortable.push([d,d3.mean(dataset.filter((d_)=>d_.kgroup==d).map((d_)=>d_[reportingMetric]))])
+  let dataToCluster   = dataset.map((d)=>{
+      let arr = []
+      clusterFeats.map((col)=>{
+        arr.push(d["sc_"+col])
+      })
+      
+      return arr
+  })
+  let kmeansResult = kmeans(dataToCluster,6)
+  
+  for (var key in kmeansResult.clusters){
+      // console.log( key, kmeansResult.clusters[key].pointIndices );
+      for (let i = 0; i < kmeansResult.clusters[key].pointIndices.length; i++) {
+          dataset[kmeansResult.clusters[key].pointIndices[i]]["kgroup"] = parseInt(key)
+        }
     }
-    )
+  
+  var reportingMetric = getReportingMetric()
+  let sortable = []
+  d3.set(dataset.map((d)=>d.kgroup)).values().map((d,i)=>{
+    // console.log(d,i)
+    // console.log(d,dataset.filter((d_)=>d_.kgroup===d).length);
+    sortable.push([d,d3.mean(dataset.filter((d_)=>d_.kgroup==d).map((d_)=>d_[reportingMetric]))])
+  }
+  )
+  // console.log(sortable);
+  sortable.sort(function(a, b) {
+    return b[1] - a[1];
+    });
     // console.log(sortable);
-    sortable.sort(function(a, b) {
-      return b[1] - a[1];
-      });
-      // console.log(sortable);
-    newMapping = {}
-    sortable.map((d,i)=>
-    {
-      newMapping[d[0]]=i
-    })
-    // console.log("new mapping",newMapping)
-    newdataset = []
-    dataset.map((d)=>{
-      newobject = d
-      newobject["kgroup"] = newMapping[d["kgroup"]]
-      newdataset.push(newobject)
-    })
-    dataset = newdataset
-    // console.log(newdataset[0])
-    // console.log(dataset)
-    simulation.stop()
-    simulation  
-    .force('charge', d3.forceManyBody().strength([0.1]))
-    .force('forceX', d3.forceX(d => foci[d.kgroup].x).strength([0.005]))
-    .force('forceY', d3.forceY(d =>  foci[d.kgroup].y ).strength([0.14]))
-    .force('collide', d3.forceCollide(d => popScale(d.Population)+1 ))
-    .alpha(1).alphaDecay([0.05])
+  newMapping = {}
+  sortable.map((d,i)=>
+  {
+    newMapping[d[0]]=i
+  })
+  // console.log("new mapping",newMapping)
+  newdataset = []
+  dataset.map((d)=>{
+    newobject = d
+    newobject["kgroup"] = newMapping[d["kgroup"]]
+    newdataset.push(newobject)
+  })
+  dataset = newdataset
+  // console.log(newdataset[0])
+  // console.log(dataset)
+  simulation.stop()
+  simulation  
+  .force('charge', d3.forceManyBody().strength([0.1]))
+  .force('forceX', d3.forceX(d => foci[d.kgroup].x).strength([0.005]))
+  .force('forceY', d3.forceY(d =>  foci[d.kgroup].y ).strength([0.14]))
+  .force('collide', d3.forceCollide(d => popScale(d.Area)+1 ))
+  .alpha(1).alphaDecay([0.05])
 
 //Reheat simulation and restart
 simulation.restart()
 let svg = d3.select("#vis")
-    .select('svg');
-    svg.selectAll(".annotations").remove().exit()
-    const annotations = [
-      // {
-      //   note: {
-      //     label: "Here is the annotation label",
-      //     title: "Annotation title",
-      //     align: "middle",  // try right or left
-      //     wrap: 200,  // try something smaller to see text split in several lines
-      //     padding: 10,   // More = text lower
-          
-      //   },
-      //   color: ["grey"],
-      //   // font-family: 'Inter',
-      //   x: foci[0].x+150,
-      //   y: foci[0].y,
-      //   dy: -20,
-      //   dx: 200
-      // }
-       // label:  `Mean ${reportingMetric}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[reportingMetric])))}`,
-      //  title: `Mean ${reportingMetric}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[reportingMetric])))}`,
-    ]
-    // foci.map((d,i)=>{
-    //   annotations.push()
-    // })
-    
-  svg
-  .append("g")
-  .selectAll('.annotations')
-  .data(foci)
-  .enter()
-  .append('text')
-  .attr("class","annotations")
-  .text((d,i)=>{
-    var displayText = ''
-    clusterFeats.map((ft)=>{
-      displayText = displayText + `Mean ${shortenFeatsReverse[ft]}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])))}`
+  .select('svg');
+  svg.selectAll(".annotations").remove().exit()
+  const annotations = [
+    // {
+    //   note: {
+    //     label: "Here is the annotation label",
+    //     title: "Annotation title",
+    //     align: "middle",  // try right or left
+    //     wrap: 200,  // try something smaller to see text split in several lines
+    //     padding: 10,   // More = text lower
+        
+    //   },
+    //   color: ["grey"],
+    //   // font-family: 'Inter',
+    //   x: foci[0].x+150,
+    //   y: foci[0].y,
+    //   dy: -20,
+    //   dx: 200
+    // }
+     // label:  `Mean ${reportingMetric}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[reportingMetric])))}`,
+    //  title: `Mean ${reportingMetric}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[reportingMetric])))}`,
+  ]
+  foci.map((d,i)=>{
+    // annotations.push()
+    clusterFeats.slice(0,4).map((ft,i_)=>{
+      // annotations.push([d,d_,shortenFeatsReverse[ft],d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft]))])
+      svg.append('g')
+        .attr('class','annotations')
+        .append('text')
+        .text(`${shortenFeatsReverse[ft]}: ${formatValue(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])))}`)
+        .attr("font-weight", 44)
+        .attr("font-size", 0)
+        .attr('fill','#352F44')
+        .attr('font-family','Inter')
+        .style("text-anchor", "middle")
+        .attr('x', d.x+(width/2.9))
+        .attr('y', d.y-height/50 + i_*20) 
+        .transition().delay(i*200)
+        .attr("font-size", 12)
+
+
     })
-    var ft = clusterFeats[0]
-    displayText = `Mean ${shortenFeatsReverse[ft]}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])))}`
-    return displayText})
-  .attr("font-weight", 44)
-    .attr("font-size", 0)
-    .attr('fill','#352F44')
-    .attr('font-family','Inter')
-    .style("text-anchor", "middle")
-    .attr('x', (d, i) => d.x+350)
-    .attr('y', (d, i) => d.y) 
-    .transition().delay((d,i)=>i*200)
-    .attr("font-size", 12)
-  
-  
-    // console.log(svg)
+  })
+
+
+
+// svg
+// .append("g")
+// .selectAll('.annotations')
+// .data(foci)
+// .enter()
+// .append('text')
+// .attr("class","annotations")
+// .text((d,i)=>{
+//   var displayText = ''
+//   clusterFeats.map((ft)=>{
+//     displayText = displayText + `Mean ${shortenFeatsReverse[ft]}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])))}`
+//   })
+//   var ft = clusterFeats[0]
+//   displayText = `Mean ${shortenFeatsReverse[ft]}: ${parseInt(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])))}`
+//   return displayText})
+// .attr("font-weight", 44)
+//   .attr("font-size", 0)
+//   .attr('fill','#352F44')
+//   .attr('font-family','Inter')
+//   .style("text-anchor", "middle")
+//   .attr('x', (d, i) => d.x+(width/3.9))
+//   .attr('y', (d, i) => d.y) 
+//   .transition().delay((d,i)=>i*200)
+//   .attr("font-size", 12)
+  //   foci.map((d,i)=>{
+  //     d3.select("#cluster"+i)
+  //     .style('left', '100px')
+  //     .style('top',  '100px')
+  //     .style('display', 'inline-block')
+  //     .style("background", "#FFFCF6")
+  //     .html(`<strong>${d}</strong><br>
+  //           ${i}: ${d}`)
+        
+
+  // })
+  // d3.select("#cluster"+0)
+  // .style('left', '100px')
+  // .style('top',  '100px')
+  // .style('display', 'inline-block')
+  // .style("background", "#FFFCF6")
+  // .html(`<strong>asdfad</strong><br>`)
+  // console.log(svg)
+  // foci.map((d,i)=>{
+  //   d3.select("#cluster"+i)
+  //   .style('left',d.x+500+'px')
+  //   .style('top',d.y+200+'px')
+  //   .style('display','inline-block')
+  //   .html(`<strong>asdfad</strong>`)
+    
+  // })
 }
 
 function reInit(){
@@ -837,9 +919,9 @@ function reInit(){
     simulation.stop()
     simulation  
     .force('charge', d3.forceManyBody().strength([0.1]))
-    .force('forceX', d3.forceX(d => width/4).strength([0.6]))
-    .force('forceY', d3.forceY(d => height/2).strength(0.04))
-    .force('collide', d3.forceCollide(d => popScale(d.Population) + 1)).tick(100)
+    .force('forceX', d3.forceX(d =>projection([d.longitude, d.latitude])[0]).strength([0.6]))
+    .force('forceY', d3.forceY(d => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY) ).strength(0.04))
+    .force('collide', d3.forceCollide(d => popScale(parseInt(d.Area)))).tick(100)
     .alphaDecay([0.05])
     // let svg = d3.select("#vis")
    

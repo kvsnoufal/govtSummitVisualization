@@ -366,8 +366,8 @@ svg text:hover{
     box-shadow: -3px 3px 15px #939393;
     color: black;
     padding: 6px;
-    font-family: "Merriweather";
-    font-size: 1.1em;
+    font-family: "Infer";
+    font-size: 0.7em;
     /* max-width: 400px; */
     z-index: 100;
 }
@@ -383,4 +383,21 @@ svg text:hover{
     padding-left:20px;
     max-width:400px;
     /* box-shadow: -3px 3px 15px #939   393; */
+}
+/* #annotations{
+    z-index: 1;
+    width:100px;
+} */
+.clusterdiv{
+    position: absolute;
+    display: none;
+    background: "#352F44";
+    border-radius: 3px;
+    box-shadow: -3px 3px 15px #939393;
+    color: black;
+    padding: 6px;
+    font-family: "Infer";
+    font-size: 0.7em;
+    /* max-width: 400px; */
+    z-index: 100;
 }
