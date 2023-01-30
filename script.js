@@ -547,7 +547,7 @@ function drawInit(){
           })
 
           // d3.select('#modalContent1').append('p').append('text').text(d.Country)
-          let modalsvg = d3.select(".modalLeftContainer").append('svg')
+          let modalsvg = d3.select(".modalLeftContainer").append('svg').attr("class","modalImgStyle")
                         .attr('width',600).attr('height',500)
           let leftScale = d3.scaleBand().rangeRound([0, 480])
                         leftScale.domain(Object.keys(shortenFeatsMapping))
@@ -594,11 +594,13 @@ function drawInit(){
                 })
                 .attr('stroke-width',1)
                 .on('mouseover',(d_)=>{
+                  // console.log(`<strong>${d_.Country}</strong><br>
+                  // ${feat}: ${d_[feat]}`)
                   d3.select("#tooltip")
                    .style('left', (d3.event.pageX + 10)+ 'px')
                     .style('top', (d3.event.pageY - 25) + 'px')
                     .style('display', 'inline-block')
-                    .style("background", "#FFFCF6")
+                    .style("background", "white")
                     .html(`<strong>${d_.Country}</strong><br>
                           ${feat}: ${d_[feat]}`)
 
@@ -614,7 +616,7 @@ function drawInit(){
 
                 })
                 .transition().delay(400)
-                .attr('r', (d_)=>5)
+                .attr('r', (d_)=>3)
                 .attr('cx', (d_, i) => gx(d_[feat]))
                 .transition().delay(400)
                 .attr('stroke-width',12)
