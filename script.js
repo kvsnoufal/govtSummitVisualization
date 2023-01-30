@@ -214,7 +214,7 @@ console.log("testing")
 
 
 const margin = {left: 10, top: 10, bottom: 10, right: 10}
-const width = 800 - margin.left - margin.right
+const width = 700 - margin.left - margin.right
 const height = 800 - margin.top - margin.bottom
 
 // let testData = [[1,1,1],
@@ -401,7 +401,7 @@ checkBox10.on("click",()=>{
     })
 
 
-d3.csv("./data_processed_v1.csv").then(function(data) {
+d3.csv("data_processed_v1.csv").then(function(data) {
     
     dataset = data
     // console.log(dataset[155]);
@@ -460,13 +460,13 @@ function drawInit(){
             // .attr('r', (d)=>0)
             // .transition().delay(100)
             .attr('r', (d)=>popScale(d.Population))
-            .attr('id',(d)=>d['ISO Country code'])
+            .attr('id',(d)=>d['code'])
     nodeTexts = svg
             .selectAll('text')
             .data(dataset)
             .enter()
             .append('text')
-                .text((d)=>d['ISO Country code'])
+                .text((d)=>d['code'])
                 .attr("font-weight", 44)
                 .attr("font-size", 7)
                 .attr('fill','#352F44')
@@ -685,7 +685,7 @@ function drawInit(){
       d3.select("#myList1").on('change',()=>{
         // console.log(d3.select("#myList1").property('value'))
         let query = d3.select("#myList1").property('value')
-        query = dataset.filter((d)=>d.Country==query)[0]['ISO Country code']
+        query = dataset.filter((d)=>d.Country==query)[0]['code']
         // console.log(query)
         d3.selectAll("#"+query).transition().duration(500)
         .attr('opacity', 1)
