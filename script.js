@@ -210,7 +210,7 @@ function kmeans(dataset, k, useNaiveSharding = true) {
 }
 
 
-console.log("testing")
+// console.log("testing")
 
 
 const margin = {left: 10, top: 10, bottom: 10, right: 10}
@@ -223,7 +223,24 @@ const height = 800 - margin.top - margin.bottom
 //                 [-1,-1,-1.5],
 //                 [-1,-1,-1.5]]
 // console.log(kmeans(testData,2))
-
+function sortArrayAscending(arr){
+  vals = arr
+  vals.sort(function(a, b){return a - b});
+}
+function percentRankAscending(arr, v) {
+  if (typeof v !== 'number') throw new TypeError('v must be a number');
+  for (var i = 0, l = arr.length; i < l; i++) {
+      if (v <= arr[i]) {
+          while (i < l && v === arr[i]) i++;
+          if (i === 0) return 0;
+          if (v !== arr[i-1]) {
+              i += (v - arr[i-1]) / (arr[i] - arr[i-1]);
+          }
+          return i / l;
+      }
+  }
+  return 1;
+}
 let dataset
 let popScale
 let simulation,nodes,nodeTexts
@@ -231,7 +248,51 @@ let projectionStretchY ,projectionMargin ,projection
 let stepSize,step,colorX,colorY
 // let testButton,testToggle,testCheckBox,testCheckBox2,closeButton
 let checkBox1,checkBox2,checkBox3,checkBox4,checkBox5,checkBox6,checkBox7,checkBox8,checkBox9,checkBox10
-let formatValue = d3.format(".2s");
+// let formatValue = d3.format(".2s");
+function formatValue(val,ft){
+  let formatter = d3.format(".2s")
+  // console.log(val,ft)
+  if (ft==='Population'){
+      return formatter(val).replace(/G/,"B")
+  }
+  if (ft==='Area'){
+      return formatter(val).replace(/G/,"B")
+  }
+  if (ft==='GINI index'){
+      return formatter(val).replace(/G/,"B")
+  }
+  if (ft==='Happy Planet Index'){
+      return formatter(val).replace(/G/,"B")
+  }
+  if (ft==='Human Development Index'){
+      return  d3.format(".2f")(val)
+  }
+  if (ft==='Sustainable Economic Ddevelopment Assessment (SEDA)'){
+      return formatter(val).replace(/G/,"B")
+  }
+  if (ft==='GDP ($ USD billions PPP)'){
+      return "$ "+ formatter(val).replace(/G/,"B")
+  }
+  if (ft==='GDP per capita in $ (PPP)'){
+      return "$ "+ formatter(val).replace(/G/,"B")
+  }
+  if (ft==='Health Expenditure (% of GDP)'){
+      return d3.format(".2f")(val)+"%"
+  }
+  if (ft==='Education Expenditure (% of GDP)'){
+      return d3.format(".2f")(val)+"%"
+  }
+  if (ft==='Military Spending (% of GDP)'){
+      return d3.format(".2f")(val)+"%"
+  }
+  if (ft==='Government Effectiveness'){
+      return d3.format(".2f")(val)+"%"
+  }
+    
+    
+
+}
+  
 
 let foci = [
     {x:width/2,y:height/7},
@@ -259,9 +320,9 @@ shortenFeatsMapping = {'Population':'Population',
 'Area':'Area',
 'GINI index':'GINI index',
 'Happy Planet Index':'Happy Planet Index',
-'Human Development Index':'Human Development Index',
+'Human Dev Index':'Human Development Index',
 'SEDA':'Sustainable Economic Ddevelopment Assessment (SEDA)',
-'GDP ':'GDP ($ USD billions PPP)',
+'GDP ($B)':'GDP ($ USD billions PPP)',
 'GDP per capita ':'GDP per capita in $ (PPP)',
 'Health Expense':'Health Expenditure (% of GDP)',
 'Education Expense':'Education Expenditure (% of GDP)',
@@ -271,9 +332,9 @@ shortenFeatsReverse = {'Population':'Population',
 'Area':'Area',
 'GINI index':'GINI index',
 'Happy Planet Index':'Happy Planet Index',
-'Human Development Index':'Human Development Index',
+'Human Development Index':'Human Dev Index',
 'Sustainable Economic Ddevelopment Assessment (SEDA)':'SEDA',
-'GDP ($ USD billions PPP)':'GDP ',
+'GDP ($ USD billions PPP)':'GDP ($B)',
 'GDP per capita in $ (PPP)':'GDP per capita ',
 'Health Expenditure (% of GDP)':'Health Expense',
 'Education Expenditure (% of GDP)':'Education Expense',
@@ -403,22 +464,32 @@ checkBox10.on("click",()=>{
     if (clusterFeats.length===0){reInit()}else{draw1Alt()}
     })
 
+var pathG = d3.geoPath();
+var projectionG = d3.geoMercator()
+  .scale(35)
+  .center([0,0])
+  .translate([120, 120]);
 
-d3.csv("data_processed_v1.csv").then(function(data) {
+// Data and color scale
+var dataG = d3.map();
+
+let datajson
+
+d3.csv("data_processed_v2.csv").then(function(data) {
     
     dataset = data
     // console.log(dataset[155]);
     popScale= d3.scaleSqrt()
                 .domain([d3.min(dataset.map((d)=>parseInt(d.Area))),
                     d3.max(dataset.map((d)=>parseInt(d.Area)))])
-                .range([8,15])
+                .range([6,12])
     // countryColor = d3.scaleOrdinal(d3.schemeTableau10)
     // .domain(dataset.map((d)=>d.Country).values());
     projectionStretchY = 0.25
     projectionMargin = 12
     projection = d3.geoEquirectangular()
-            .scale((width / 4 - projectionMargin) / Math.PI)
-            .translate([width / 4, height* (1 - projectionStretchY )/ 2]);
+            .scale((width / 2 - projectionMargin) / Math.PI)
+            .translate([width / 2, height* (1 - projectionStretchY )/ 2]);
     // stepSize = 12
     // size = 174
     // newdataset= []
@@ -438,9 +509,20 @@ d3.csv("data_processed_v1.csv").then(function(data) {
     //   .range(['#FFF6EA', '#68A4CC']);
       
     countryColor = d3.scaleOrdinal(d3.schemeTableau10)
-      .domain(dataset.map((d)=>d.Country).values());
+      .domain(dataset.map((d)=>d['ISO Country code']).values());
     
-    setTimeout(drawInit(), 100)
+      fetch('./world.geojson')
+      .then((response) => response.json())
+      .then((json) =>{ datajson = json
+        
+
+
+        setTimeout(drawInit(), 100)
+      });
+    
+
+
+    
     
     // console.log("done")
     // draw1();
@@ -458,6 +540,7 @@ function drawInit(){
   //     // console.log(d3.interpolateLab(colorY(d.latitudeProj),colorX(d.longitudeProj))(0.5))
   //     return d3.interpolateRgb(colorY(d.latitudeProj),colorX(d.longitudeProj))(0.5)
   // }
+  // console.log(datajson)
   newdataset = []
     dataset.map((d)=>{
       d['kgroup']=0
@@ -470,8 +553,25 @@ function drawInit(){
             .attr('height', height)
             .attr('opacity', 1)
             .style("background", "#FFFCF6")
+            .attr('class','mainVis')
     // .attr("background-color",'black')
 
+    svg.append("g")
+    .selectAll(".mainMap")
+    .data(datajson.features)
+    .enter()
+    .append("path")
+    .attr('class','mainMap')
+      // draw each country
+      .attr("d", d3.geoPath()
+        .projection(projectionG)
+      )
+      .attr('opacity',0.7)
+      // set the color of each country
+      .attr("fill", function (d) {
+        return countryColor(d.id)
+      });
+    
     simulation = d3.forceSimulation(dataset)
 
      // Define each tick of simulation
@@ -491,8 +591,8 @@ function drawInit(){
         .data(dataset)
         .enter()
         .append('circle')
-            .attr('fill', (d)=>countryColor(d.Country))
-            .attr('opacity', 0.8)
+            .attr('fill', (d)=>countryColor(d['ISO Country code']))
+            .attr('opacity', 0.7)
             .attr('cx', (d, i) => projection([d.longitude, d.latitude])[0])
             .attr('cy', (d, i) => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY))
             .attr('id',(d)=>d['code'])
@@ -511,13 +611,14 @@ function drawInit(){
                 .attr('fill','#352F44')
                 .attr('font-family','Inter')
                 .style("text-anchor", "middle")
-                .attr('x', (d, i) => projection([d.longitude, d.latitude])[0])
-                .attr('y', (d, i) => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY))   
+                .attr('transform','translate(0,2)')
+                // .attr('x', (d, i) => projection([d.longitude, d.latitude])[0])
+                // .attr('y', (d, i) => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY))   
     
     simulation  
             .force('charge', d3.forceManyBody().strength([0.1]))
-            .force('forceX', d3.forceX(d =>projection([d.longitude, d.latitude])[0]).strength([0.6]))
-            .force('forceY', d3.forceY(d => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY) ).strength(0.04))
+            .force('forceX', d3.forceX(d =>projection([d.longitude, d.latitude])[0]).strength([0.05]))
+            .force('forceY', d3.forceY(d => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY) ).strength(0.7))
             .force('collide', d3.forceCollide(d => popScale(parseInt(d.Area)))).tick(100)
             .alphaDecay([0.05])
     
@@ -545,46 +646,62 @@ function drawInit(){
             modal.style('display','none')
             d3.select(".modalRightContainer").selectAll("table").remove().exit()
           })
-
+          let modalwidth = 600
+          let modalheight = 500
+          let axisAllowanceX = 80
+          let axisAllowanceY = 20
+          let xaxisPointStart = 20
+          let xLastDistanceFromEnd = 120
+          let Xpointextend = modalwidth-xLastDistanceFromEnd-axisAllowanceX
           // d3.select('#modalContent1').append('p').append('text').text(d.Country)
           let modalsvg = d3.select(".modalLeftContainer").append('svg').attr("class","modalImgStyle")
-                        .attr('width',600).attr('height',500)
-          let leftScale = d3.scaleBand().rangeRound([0, 480])
+                        .attr('width',modalwidth).attr('height',modalheight)
+          let leftScale = d3.scaleBand().rangeRound([0, modalheight-axisAllowanceY])
                         leftScale.domain(Object.keys(shortenFeatsMapping))
-          let bottomScale = d3.scaleBand().rangeRound([0, 600-50])
+          let bottomScale = d3.scaleBand().rangeRound([0, modalwidth-axisAllowanceX-xLastDistanceFromEnd])
                         bottomScale.domain(['low','','high'])
           modalsvg.append('g').attr("class","leftAAxis")
                         .attr('font-size',8)
-                          .attr('transform','translate(105,0)')
+                          .attr('transform',`translate(${axisAllowanceX},0)`)
                           .call(d3.axisLeft(leftScale))
           modalsvg.append('g').attr("class","bottomAAxis")
                           .attr('font-size',8)
-                            .attr('transform',`translate(105,${500 - 20})`)
+                            .attr('transform',`translate(${axisAllowanceX},${modalheight - axisAllowanceY})`)
                             .call(d3.axisBottom(bottomScale));
-
+          
 
           let gdataset = dataset.filter((d_)=>d_.kgroup==d.kgroup)
           console.log(gdataset.length)
 
-
+          // modalsvg.append("foreignObject")
+          //                   .attr("width", 280)
+          //                   .attr("height", 200)
+          //                   .attr('z-index',1000)
+          //                   .attr('x',modalwidth-xLastDistanceFromEnd+20)
+          //                   .attr('y',100)
+          //                 .append("xhtml:body")
+          //                   .style("font", "14px 'Infer'")
+          //                   .html("<div class='isightclass'><p>Insights</p><p>Insights</p><p>Insights</p></div>");
+                        
           allFeatures.map((feat,index)=>{
             // let feat = "sc_"+vfeat
           
             // .attr("width")
   
   // console.log(feat)
+            
             let group1 = modalsvg.append('g')
-              .attr('transform',"translate(110,20)")
+              .attr('transform',`translate(70,${xaxisPointStart})`)
               .attr('class',"circleGroup")
             let gx = d3.scaleLinear().domain([d3.min(gdataset.map((d_)=>parseFloat(d_[feat]))),
-              d3.max(gdataset.map((d_)=>parseFloat(d_[feat])))]).range([20,460])
+              d3.max(gdataset.map((d_)=>parseFloat(d_[feat])))]).range([xaxisPointStart,Xpointextend])
             // let gx = d3.scaleLinear().range([20,460])
             // gx.domain(d3.extent(gdataset.map((v)=>v[feat])))
             group1.selectAll('circle')
             .data(gdataset)
             .enter()
             .append('circle')
-                .attr('fill', (d_)=>countryColor(d_.Country))
+                .attr('fill', (d_)=>countryColor(d_['ISO Country code']))
                 .attr('opacity', 0.8)
                 .attr('cx', (d_, i) =>0)
                 .attr('cy', (d_, i) => leftScale(shortenFeatsReverse[feat]))
@@ -602,7 +719,7 @@ function drawInit(){
                     .style('display', 'inline-block')
                     .style("background", "white")
                     .html(`<strong>${d_.Country}</strong><br>
-                          ${feat}: ${d_[feat]}`)
+                          ${feat}: ${formatValue(d_[feat],feat)}`)
 
                 })
                 .on('mouseout',(d_)=>{
@@ -629,14 +746,14 @@ function drawInit(){
                             .style("border", "2px #F1D46D solid");
             rightBlock.append("thead").append("tr")
                             .selectAll("th")
-                            .data(["Property","Value","Cluster Mean"])
+                            .data(["Index","Value","Rank %"])
                             .enter().append("th")
                             .text(function(d_) { return d_; })
                             .style("border", "3px #F1D46D solid")
                             .style("padding", "5px")
                             .style("background-color", "#F1D46D")
-                            .style("font-weight", "12")
-                            .style("text-transform", "uppercase");
+                            .style("font-weight", "8")
+                            // .style("text-transform", "uppercase");
 
           
           
@@ -644,9 +761,14 @@ function drawInit(){
                             .selectAll("tr").data(Object.keys(shortenFeatsMapping))
                             .enter().append("tr")
                             .selectAll("td")
-                            .data(function(ft){return [ft, 
-                              formatValue(d[shortenFeatsMapping[ft]]),
-                              formatValue(d3.mean(gdataset.map((d_)=>parseFloat(d_[shortenFeatsMapping[ft]]))))
+                            .data(function(ft){
+                              let arr = gdataset.map((d_)=>parseFloat(d_[shortenFeatsMapping[ft]]))
+                              arr.sort(function(a, b){return a - b})
+                              console.log(arr[0],d[shortenFeatsMapping[ft]])
+                              let rankpct = percentRankAscending(arr,parseFloat(d[shortenFeatsMapping[ft]]))
+                              return [ft, 
+                              formatValue(d[shortenFeatsMapping[ft]],shortenFeatsMapping[ft]),
+                              d3.format(".2f")((1 - rankpct)*100)+"%"
                             ];})
                             .enter().append("td")
                             .style("border", "1px #F1D46D white")
@@ -659,7 +781,7 @@ function drawInit(){
                           })
                             .text(function(d_){return d_;})
                             .style("font-size", "12px");
-                        
+                
         }
         
         function mouseOverTex(d, i){
@@ -670,7 +792,17 @@ function drawInit(){
               .attr('opacity', 1)
               // .attr('stroke-width', 5)
               // .attr('stroke', 'black')
-         
+              d3.selectAll("#"+d.code)
+              .transition('mouseover').duration(100)
+              .attr('opacity', 1)
+              .attr('stroke-width', 5)
+              .attr('stroke', '#ffa500')
+              d3.select("#tooltipMain")
+              .style('left', (d3.event.pageX + 10)+ 'px')
+              .style('top', (d3.event.pageY - 25) + 'px')
+              .style('display', 'inline-block')
+              .style("background", "#FFFCF6")
+              .html(`${d.Country}`)
              
             }
         function mouseOutTex(d, i){
@@ -680,7 +812,24 @@ function drawInit(){
               d3.select(this)
                   .transition('mouseout').duration(100)
                   .attr('opacity', 0.8)
-                  .attr('stroke-width', 0)
+                  // .attr('stroke-width', 0)
+              let highlightSelection = d3.select("#myList1").property('value')
+              if (highlightSelection!=d.Country){
+                d3.selectAll("#"+d.code)
+                .transition('mouseout').duration(100)
+                .attr('opacity', 0.7)
+                .attr('stroke-width', 0)
+              }else{
+                d3.selectAll("#"+d.code)
+                .transition('mouseout').duration(100)
+                .attr('opacity', 0.7)
+                .attr('opacity', 1)
+                .attr('stroke-width', 3)
+                .attr('stroke', 'black')
+              }
+                  
+                  d3.select("#tooltipMain")
+                  .style('display', 'none');
           }
 
     function mouseOver(d, i){
@@ -690,7 +839,7 @@ function drawInit(){
             .transition('mouseover').duration(100)
             .attr('opacity', 1)
             .attr('stroke-width', 5)
-            .attr('stroke', 'black')
+            .attr('stroke', '#ffa500')
         
           d3.select("#tooltipMain")
           .style('left', (d3.event.pageX + 10)+ 'px')
@@ -706,48 +855,71 @@ function drawInit(){
     function mouseOut(d, i){
         
         // d3.select('#tooltip').select("circle").remove()
-
-        d3.select(this)
+        let highlightSelection = d3.select("#myList1").property('value')
+        if (highlightSelection!=d.Country){
+          d3.select(this)
             .transition('mouseout').duration(100)
-            .attr('opacity', 0.8)
+            .attr('opacity', 0.7)
             .attr('stroke-width', 0)
+        }else{
+          d3.select(this)
+          .transition('mouseout').duration(100)
+          .attr('opacity', 0.7)
+          .attr('opacity', 1)
+          .attr('stroke-width', 3)
+          .attr('stroke', 'black')
+        }
+        // d3.select(this)
+        //     .transition('mouseout').duration(100)
+        //     .attr('opacity', 0.7)
+        //     .attr('stroke-width', 0)
             // d3.select("#tooltipMain").remove().exit();
             d3.select("#tooltipMain")
             .style('display', 'none');
             // d3.select("#tooltipMain").remove().exit();
-    }
 
+
+
+    }
+    var highlight_list = ["Select Country"]
+    dataset.map((d)=>{highlight_list.push(d.Country)})
     d3.select("#myList1").selectAll("option")
-      .data(dataset)
+      .data(highlight_list)
       .enter()
       .append('option')
-      .text((d)=>d.Country)
-      .attr('value',(d)=>(d.Country));
+      .text((d)=>d)
+      .attr('value',(d)=>(d));
       d3.select("#myList1").on('change',()=>{
         // console.log(d3.select("#myList1").property('value'))
         let query = d3.select("#myList1").property('value')
+        if (query!="Select Country"){
         query = dataset.filter((d)=>d.Country==query)[0]['code']
         // console.log(query)
         d3.selectAll("#"+query).transition().duration(500)
         .attr('opacity', 1)
         .attr('stroke-width', 2)
         .attr('stroke', 'black')
-        .transition().duration(500)
+        .transition().duration(1000)
         .attr('opacity', 0.5)
         .attr('stroke-width', 15)
         .attr('stroke', 'red')
-        .transition().duration(500)
+        .transition().duration(1000)
         .attr('opacity', 1)
         .attr('stroke-width', 3)
         .attr('stroke', 'black')
-        .transition().duration(500)
+        .transition().duration(1000)
         .attr('opacity', 1)
         .attr('stroke-width', 15)
         .attr('stroke', 'red')
-        .transition().duration(500)
+        .transition().duration(1000)
         .attr('opacity', 1)
         .attr('stroke-width', 3)
-        .attr('stroke', 'black')
+        .attr('stroke', 'black')}else{
+          d3.selectAll('circle')
+          .transition('mouseout').duration(100)
+                .attr('opacity', 0.7)
+                .attr('stroke-width', 0)
+        }
    
       })
       
@@ -756,6 +928,7 @@ function getReportingMetric(){
   return clusterFeats[0]
 }
 function draw1Alt(){
+  d3.selectAll('.mainMap').remove().exit()
   let dataToCluster   = dataset.map((d)=>{
       let arr = []
       clusterFeats.map((col)=>{
@@ -804,16 +977,17 @@ function draw1Alt(){
   simulation.stop()
   simulation  
   .force('charge', d3.forceManyBody().strength([0.1]))
-  .force('forceX', d3.forceX(d => foci[d.kgroup].x).strength([0.005]))
-  .force('forceY', d3.forceY(d =>  foci[d.kgroup].y ).strength([0.14]))
-  .force('collide', d3.forceCollide(d => popScale(d.Area)+1 ))
-  .alpha(1).alphaDecay([0.05])
+  .force('forceX', d3.forceX(d => foci[d.kgroup].x).strength([0.05]))
+  .force('forceY', d3.forceY(d =>  foci[d.kgroup].y ).strength([0.2]))
+  .force('collide', d3.forceCollide(d => popScale(d.Area) ))
+  .alpha(0.7).alphaDecay([0.05])
 
 //Reheat simulation and restart
 simulation.restart()
 let svg = d3.select("#vis")
   .select('svg');
   svg.selectAll(".annotations").remove().exit()
+  svg.selectAll(".annotationMap").remove().exit()
   const annotations = [
     // {
     //   note: {
@@ -841,7 +1015,7 @@ let svg = d3.select("#vis")
       svg.append('g')
         .attr('class','annotations')
         .append('text')
-        .text(`${shortenFeatsReverse[ft]}: ${formatValue(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])))}`)
+        .text(`${shortenFeatsReverse[ft]}: ${formatValue(d3.mean(dataset.filter((d_)=>d_.kgroup==i).map((d_)=>d_[ft])),ft)}`)
         .attr("font-weight", 44)
         .attr("font-size", 0)
         .attr('fill','#352F44')
@@ -852,8 +1026,50 @@ let svg = d3.select("#vis")
         .transition().delay(i*200)
         .attr("font-size", 12)
 
-
     })
+    let projectionGC = d3.geoMercator()
+    .scale(25)
+    .center([0,0])
+    .translate([ d.x-(width/2.9), d.y-height/50 + 30]);
+    svg.append("g")
+    .attr('class','annotationMap')
+      .selectAll(`.clusterMap${i}`)
+      .data(datajson.features)
+      .enter()
+      .append("path")
+      .attr('class',`clusterMap${i}`)
+        // draw each country
+        .attr("d", d3.geoPath()
+          .projection(projectionGC)
+        )
+        // set the color of each country
+        // .attr('fill','none')
+        // .attr('stroke','#ffa500')
+        // .transition().delay(500)
+        // .attr('stroke','none')
+        .attr("fill", function (v) {
+          // console.log(dataset.filter((d_)=>d_["ISO Country code"]===v.id),v.id)
+          if (dataset.filter((d_)=>d_["ISO Country code"]===v.id)[0].kgroup===i){
+          return '#ffa500'}
+          else{
+            return 'grey'
+          }
+        })
+        // .attr("opacity", 0)
+        // .transition().delay(i*200)
+        
+        .attr("opacity", function (v) {
+          // console.log(dataset.filter((d_)=>d_["ISO Country code"]===v.id),v.id)
+          if (dataset.filter((d_)=>d_["ISO Country code"]===v.id)[0].kgroup===i){
+          return 0.7}
+          else{
+            return 0.3
+          }
+        })
+        // .attr('opacity',0)
+        // .transition().delay(300)
+        // .attr('opacity',1)
+        ;
   })
 
 
@@ -921,14 +1137,40 @@ function reInit(){
     simulation.stop()
     simulation  
     .force('charge', d3.forceManyBody().strength([0.1]))
-    .force('forceX', d3.forceX(d =>projection([d.longitude, d.latitude])[0]).strength([0.6]))
-    .force('forceY', d3.forceY(d => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY) ).strength(0.04))
+    .force('forceX', d3.forceX(d =>projection([d.longitude, d.latitude])[0]).strength([0.04]))
+    .force('forceY', d3.forceY(d => projection([d.longitude, d.latitude])[1]* (1 + projectionStretchY) ).strength(0.2))
     .force('collide', d3.forceCollide(d => popScale(parseInt(d.Area)))).tick(100)
     .alphaDecay([0.05])
     // let svg = d3.select("#vis")
    
     d3.selectAll(".annotations").remove().exit()
+    d3.selectAll(".clusterMap").remove().exit()
+    d3.selectAll(".annotationMap").remove().exit()
+    // console.log(datajson)
+    d3.select(".mainVis").append("g")
+    .selectAll(".mainMap")
+    .data(datajson.features)
+    .enter()
+    .append("path")
+    .attr('class','mainMap')
+      // draw each country
+      .attr("d", d3.geoPath()
+        .projection(projectionG)
+      )
+      // set the color of each country
+      // .attr('fill','none')
+      // .attr('stroke','#ffa500')
+      // .transition().delay(500)
+      .attr('stroke','none')
+      
+      .attr("fill", function (d) {
+        return countryColor(d.id)
+      })
+      .attr('opacity',0)
+      .transition().delay(300)
+      .attr('opacity',0.7)
+      ;
 //Reheat simulation and restart
-simulation.alpha(1).restart()
+simulation.alpha(0.7).restart()
         
 }

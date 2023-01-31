@@ -118,7 +118,7 @@ input[type='radio']:checked:after {
 }
 
 
-@media only screen and (max-width: 1200px) and (min-width:1023px) {
+@media only screen and (max-width: 1200px) and (min-width:900px) {
     .headingMain {
         font-size: 32px;
         font-weight: 500;
@@ -337,8 +337,8 @@ input[type='radio']:checked:after {
     .modal {
         display: none;
         position: fixed;
-        z-index: 1000;
-        padding-top: 100px;
+        z-index: 1;
+        padding-top: 10px;
         left: 0;
         top: 0;
         width: 100%; 
@@ -450,7 +450,7 @@ svg text:hover{
     font-family: "Infer";
     font-size: 0.7em;
     /* max-width: 400px; */
-    z-index: 100;
+    z-index: 10;
 }
 
 .bottomBox{

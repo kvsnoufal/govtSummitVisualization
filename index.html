@@ -5,7 +5,8 @@
   <script src='https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js'></script>
   <script src="d3.js"></script>
   <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
-
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <link href='https://fonts.googleapis.com/css?family=Inter' rel='stylesheet'>
   <title>graph</title>
@@ -87,24 +88,23 @@
             <label for="o7" class="radioStyle">GDP Per Capita</label>
             </div>
             
-            <div class="box ">
-            <input type="checkbox" class="checkbox-round" id="o8" />
-            <label for="o8" class="radioStyle">Health Expense (% of GDP)</label>
-            </div>
-            
-            <div class="box ">
-            <input type="checkbox" class="checkbox-round" id="o9" />
-            <label for="o9" class="radioStyle">Education Expense (% of GDP)</label>
-            </div>
 
             <div class="box ">
               <input type="checkbox" class="checkbox-round" id="o9_" />
               <label for="o9_" class="radioStyle">Government Effectiveness</label>
               </div>
-            
+              <div class="box ">
+                <input type="checkbox" class="checkbox-round" id="o8" />
+                <label for="o8" class="radioStyle">Health Expense (% of GDP)</label>
+                </div>
+                
+              <div class="box ">
+                <input type="checkbox" class="checkbox-round" id="o9" />
+                <label for="o9" class="radioStyle">Education Expense (% of GDP)</label>
+              </div>
             <div class="box ">
             <input type="checkbox" class="checkbox-round" id="o10" />
-            <label for="o10" class="radioStyle">Military Spending</label>
+            <label for="o10" class="radioStyle">Military Spending (% of GDP)</label>
             </div>
           <div class="bottomBox">
             <!-- <svg></svg> -->
@@ -234,7 +234,7 @@
   }
 </script>
 
-  <script src="script.js"></script>
+  <script src="script.js" ></script>
   <!-- <script src="kmeans.js"></script> -->
 
  
