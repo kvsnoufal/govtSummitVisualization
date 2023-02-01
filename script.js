@@ -485,6 +485,8 @@ d3.csv("data_processed_v2.csv").then(function(data) {
                 .range([6,12])
     // countryColor = d3.scaleOrdinal(d3.schemeTableau10)
     // .domain(dataset.map((d)=>d.Country).values());
+    
+
     projectionStretchY = 0.25
     projectionMargin = 12
     projection = d3.geoEquirectangular()
@@ -541,6 +543,54 @@ function drawInit(){
   //     return d3.interpolateRgb(colorY(d.latitudeProj),colorX(d.longitudeProj))(0.5)
   // }
   // console.log(datajson)
+  // var legendsvg = d3.select(".info")
+  // .append("svg")
+  //   .attr("width", 200)
+  //   .attr("height", 40)
+  // var valuesToShow = [d3.min(dataset.map((d)=>parseInt(d.Area))),
+  // (d3.min(dataset.map((d)=>parseInt(d.Area)))+
+  // d3.max(dataset.map((d)=>parseInt(d.Area))) )/2 ,
+  // d3.max(dataset.map((d)=>parseInt(d.Area)))]
+  // var yCircle = 15
+  // var yLegend = 38
+  // var xCircle = 45
+  // var dxCircle = 30
+  
+  // legendsvg
+  // .selectAll("legend")
+  // .data(valuesToShow)
+  // .enter()
+  // .append("circle")
+  // .attr("cx", (d,i)=>{return (i*dxCircle)+xCircle})
+  // .attr("cy", function(d){ return yCircle } )
+  // .attr("r", function(d){ return popScale(d) })
+  // .style("fill", "grey")
+  // .style('opacity',0.7)
+  // .attr("stroke", "black")
+
+  // // Add legend: labels
+  // legendsvg
+  // .selectAll("legend")
+  // .data(valuesToShow)
+  // .enter()
+  // .append("text")
+  // .attr('x', (d,i)=>{return (i*dxCircle)+xCircle})
+  // .attr('y', yLegend )
+  // .text( function(d){ return formatValue(d,"Area") } )
+  // .style("font-size", 10)
+  // // .attr('alignment-baseline', 'middle')
+  // .style("text-anchor", "middle")
+
+  // legendsvg
+  // .selectAll("legend")
+  // .data(["Area"])
+  // .enter()
+  //   .append("text")
+  //   .attr('x',5)
+  //   .attr('y',yLegend)
+  //   .text((d)=>d)
+  //   .style("font-size", 12);
+
   newdataset = []
     dataset.map((d)=>{
       d['kgroup']=0
@@ -649,9 +699,10 @@ function drawInit(){
           })
           let modalwidth = 700
           let modalheight = 500
-          let axisAllowanceX = 80
+          let axisAllowanceX = 97
           let axisAllowanceY = 20
-          let xaxisPointStart = 20
+          let xaxisPointStart = 37
+          let yaxisPointStart = 20
           let xLastDistanceFromEnd = 370
           let Xpointextend = modalwidth-xLastDistanceFromEnd-axisAllowanceX
           // d3.select('#modalContent1').append('p').append('text').text(d.Country)
@@ -731,7 +782,7 @@ function drawInit(){
           tempgdataset = tempgdataset.slice(0,3)
 
           if (clusterFeats.length===0){
-            insight2 = "Please select indices to get more cluster insights"
+            insight2 = "Please select indicators to get more cluster insights"
           }else{
             insight2 = "In this cluster "
             tempgdataset.map((v,vi)=>{
@@ -739,9 +790,9 @@ function drawInit(){
                 insight2 = insight2+v.Country+", "
               }else{
                 if (tempgdataset.length!=1){
-                insight2 = insight2+"and " +v.Country +" have similar indices as "+d.Country+"."}
+                insight2 = insight2+"and " +v.Country +" have similar indicators as "+d.Country+"."}
                 else{
-                  insight2 = insight2+"" +v.Country +" has similar index as "+d.Country+"."
+                  insight2 = insight2+"" +v.Country +" has similar indicators as "+d.Country+"."
                 }
               }
             })
@@ -784,37 +835,7 @@ function drawInit(){
           bottom10=[]
           if (clusterFeats.length===0){
             console.log("not clustered")
-            // modalsvg.append("foreignObject")
-            //                 .attr("width", 280)
-            //                 .attr("height", 400)
-            //                 .attr('z-index',1000)
-            //                 .attr('x',modalwidth-xLastDistanceFromEnd+20)
-            //                 .attr('y',100)
-            //               .append("xhtml:body")
-            //                 .style("font", "14px 'Infer'")
-            //                 .html(`<div class='isightclass'><p class='insightHeader'>Insights</p><p class='insight1'>${insight1}</p><p class='insight2'>${insight2}</p></div>`)
-            // let textAnn = modalsvg.append('g').selectAll('text')
-            //               .data([{insights:"insights",insight1:insight1,insight2:insight2}])
-            //               .enter()
-            //               .append('text')
-            //               .attr('x',modalwidth-xLastDistanceFromEnd+20)
-            //               .attr('y',100)
-            // textAnn.append('tspan')
-            //         .attr('class','insightHeader')
-            //         .text(t=>t.insights)
-            // textAnn.append('tspan')
-            //         .attr('class','insight1')
-            //         .text(t=>t.insight1)
-            //         .attr('x',modalwidth-xLastDistanceFromEnd+20)
-            //         .attr('dx',0)
-            //         .attr('dy',25)
-                    
-            //         textAnn.append('tspan')
-            //         .attr('class','insight2')
-            //         .text(t=>t.insight2)
-            //         .attr('x',modalwidth-xLastDistanceFromEnd+20)
-            //         .attr('dx',0)
-            //         .attr('dy',25)
+            
             modalsvg.append('g')
                     .append('text')
                     .text('Insights')
@@ -835,22 +856,14 @@ function drawInit(){
                     .text(insight2)
                     .call(wrap,xLastDistanceFromEnd-20)
           }else if(gdataset.length<=4){
-          //   modalsvg.append("foreignObject")
-          //   .attr("width", 280)
-          //   .attr("height", 400)
-          //   .attr('z-index',1000)
-          //   .attr('x',modalwidth-xLastDistanceFromEnd+20)
-          //   .attr('y',100)
-          // .append("xhtml:body")
-          //   .style("font", "14px 'Infer'")
-          //   .html(`<div class='isightclass'><p class='insightHeader'>Insights</p><p class='insight1'>Too few countries in Cluster</p><p class='insight2'>Check out some other cluster to get more insights</p></div>`);
+         
   modalsvg.append('g')
           .append('text')
           .text('Insights')
           .attr('x',modalwidth-xLastDistanceFromEnd+20)
           .attr('y',20)
                     .attr('font-size',20)
-          // .attr('fill','blue')
+          
   modalsvg.append('g')
           .append('text')
           .attr('x',modalwidth-xLastDistanceFromEnd+20)
@@ -936,7 +949,7 @@ function drawInit(){
             }
             
             htmlbase = htmlbase+"</div>"
-            console.log(htmlbase)
+            // console.log(htmlbase)
             modalsvg.append('g')
                 .append('text')
                 .attr('x',modalwidth-xLastDistanceFromEnd+20)
@@ -974,7 +987,7 @@ function drawInit(){
   // console.log(feat)
             
             let group1 = modalsvg.append('g')
-              .attr('transform',`translate(70,${xaxisPointStart})`)
+              .attr('transform',`translate(70,${yaxisPointStart})`)
               .attr('class',"circleGroup")
             let gx = d3.scaleLinear().domain([d3.min(gdataset.map((d_)=>parseFloat(d_[feat]))),
               d3.max(gdataset.map((d_)=>parseFloat(d_[feat])))]).range([xaxisPointStart,Xpointextend])
@@ -1072,30 +1085,13 @@ function drawInit(){
           let fromCoords,toCoords;
           fromCoords=[]
           toCoords=[]
-          // circs=[]
-          // top10.map((ft)=>{
-            
-          //   let circles = modalsvg.selectAll("#"+d["ISO Country code"]+allFeatures.indexOf(ft))   
-          //   // console.log(circles)  
-          //   circles.each((d,i,nodes) => {
-          //     // console.log(nodes[i].getAttribute('cx'))
-          //     fromCoords.push([parseFloat(nodes[i].getAttribute('cx')),parseFloat(nodes[i].getAttribute('cy'))])
-          //     });       
-          //   modalsvg.select("foreignObject").selectAll(".insight3").each((d,i,nodes) => {
-          //     // toCoords.push(nodes[i].getAttribute(""))
-          //     // console.log(nodes[i].getBoundingClientRect())
-          //     let brect = nodes[i].getBoundingClientRect()
-          //     console.log(brect)
-          //     toCoords.push([brect.x + (modalwidth-xLastDistanceFromEnd+20)  ,brect.y])
-          //   })
-          //   // console.log()
-          // })
+          
           top10.map((ft)=>{
             let gx = d3.scaleLinear().domain([d3.min(gdataset.map((d_)=>parseFloat(d_[ft]))),
               d3.max(gdataset.map((d_)=>parseFloat(d_[ft])))]).range([xaxisPointStart,Xpointextend])
             let cx = gx(d[ft])
             let cy = leftScale(shortenFeatsReverse[ft])
-            fromCoords.push([cx+70,cy+xaxisPointStart])
+            fromCoords.push([cx+70,cy+yaxisPointStart])
             // toCoords.push([modalwidth-xLastDistanceFromEnd+20,100])
             toCoords.push([modalwidth-xLastDistanceFromEnd+20,210])
             })
@@ -1132,7 +1128,7 @@ function drawInit(){
               d3.max(gdataset.map((d_)=>parseFloat(d_[ft])))]).range([xaxisPointStart,Xpointextend])
             let cx = gx(d[ft])
             let cy = leftScale(shortenFeatsReverse[ft])
-            fromCoords.push([cx+70,cy+xaxisPointStart])
+            fromCoords.push([cx+70,cy+yaxisPointStart])
             // toCoords.push([modalwidth-xLastDistanceFromEnd+20,100])
             toCoords.push([modalwidth-xLastDistanceFromEnd+20,270])
             })
@@ -1159,44 +1155,12 @@ function drawInit(){
             .transition().delay(1500)
             .attr("stroke", "#F28E2C")
             
-                // .transition()
-
-                // .transition()
+               
                 ;}
-          //       fromCoords=[]
-          //       toCoords=[]
-                
-          //       bottom10.map((ft)=>{
-          //         let gx = d3.scaleLinear().domain([d3.min(gdataset.map((d_)=>parseFloat(d_[ft]))),
-          //           d3.max(gdataset.map((d_)=>parseFloat(d_[ft])))]).range([xaxisPointStart,Xpointextend])
-          //         let cx = gx(d[ft])
-          //         let cy = leftScale(shortenFeatsReverse[ft])
-          //         fromCoords.push([cx+70,cy+xaxisPointStart])
-          //         // toCoords.push([modalwidth-xLastDistanceFromEnd+20,100])
-          //         modalsvg.select("foreignObject").selectAll(".insight4").each((d,i,nodes) => {
-          //           let brect = nodes[i].getBoundingClientRect()
-          //           console.log(brect)
-          //           toCoords.push([modalwidth-xLastDistanceFromEnd+20,brect.top-brect.height/2-axisAllowanceY-40])
-          //         })
-      
-      
-          //         })
-          //       console.log(fromCoords)
-          //       console.log(toCoords)
-                
-          //       var line = d3.line()
-          //       .x(d => d.x)
-          //       .y(d => d.y)
-          //       .curve(d3.curveBasis);
-          //         ;
-          //       for (var i=0; i < fromCoords.length; i++) {
-          //         modalsvg.append("path")
-          //             .attr("class", "plot")
-          //             .datum([{'x':fromCoords[i][0],"y":fromCoords[i][1]},{'x':toCoords[i][0],"y":toCoords[i][1]}])
-          //             .attr("d", line).attr("fill", "none")
-          //             .attr("stroke", "#F28E2C");}
+          
+           
 
-        
+
 
 
         }
@@ -1314,6 +1278,9 @@ function drawInit(){
         if (query!="Select Country"){
         query = dataset.filter((d)=>d.Country==query)[0]['code']
         // console.log(query)
+        document.querySelector("#"+query).scrollIntoView({
+          behavior: 'smooth'
+      });
         d3.selectAll("#"+query).transition().duration(500)
         .attr('opacity', 1)
         .attr('stroke-width', 2)
@@ -1342,6 +1309,57 @@ function drawInit(){
    
       })
       
+      
+      var valuesToShow = [d3.min(dataset.map((d)=>parseInt(d.Area))),
+      (d3.min(dataset.map((d)=>parseInt(d.Area)))+
+      d3.max(dataset.map((d)=>parseInt(d.Area))) )/2 ,
+      d3.max(dataset.map((d)=>parseInt(d.Area)))]
+      var yCircle = 15
+      var yLegend = 38
+      var xCircle = 45
+      var dxCircle = 30
+      var legendsvg = svg
+      .append("g")
+       .attr('transform', `translate(${width/2-xCircle},10)`)
+      legendsvg
+      .selectAll("legend")
+      .data(valuesToShow)
+      .enter()
+      .append("circle")
+      .attr("cx", (d,i)=>{return (i*dxCircle)+xCircle})
+      .attr("cy", function(d){ return yCircle } )
+      .attr("r", function(d){ return popScale(d) })
+      .style("fill", "grey")
+      .style('opacity',0.7)
+      .attr("stroke", "black")
+    
+      // Add legend: labels
+      legendsvg
+      .selectAll("legend")
+      .data(valuesToShow)
+      .enter()
+      .append("text")
+      .attr('x', (d,i)=>{return (i*dxCircle)+xCircle})
+      .attr('y', yLegend )
+      .text( function(d){ return formatValue(d,"Area") } )
+      .style("font-size", 10)
+      // .attr('alignment-baseline', 'middle')
+      .style("text-anchor", "middle")
+    
+      legendsvg
+      .selectAll("legend")
+      .data(["Area"])
+      .enter()
+        .append("text")
+        .attr('x',5)
+        .attr('y',yLegend)
+        .text((d)=>d)
+        .style("font-size", 12);
+    
+
+
+
+
 }
 function getReportingMetric(){
   return clusterFeats[0]
