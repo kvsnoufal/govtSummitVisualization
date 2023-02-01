@@ -434,7 +434,7 @@ svg text:hover{
     box-shadow: -3px 3px 15px #939393;
     color: black;
     padding: 6px;
-    font-family: "Infer";
+    font-family: "Inter";
     font-size: 0.9em;
     /* max-width: 400px; */
     z-index: 100;
@@ -447,7 +447,7 @@ svg text:hover{
     box-shadow: -3px 3px 15px #939393;
     color: black;
     padding: 6px;
-    font-family: "Infer";
+    font-family: "Inter";
     font-size: 0.7em;
     /* max-width: 400px; */
     z-index: 10;
@@ -475,8 +475,13 @@ svg text:hover{
     box-shadow: -3px 3px 15px #939393;
     color: black;
     padding: 6px;
-    font-family: "Infer";
+    font-family: "Inter";
     font-size: 0.7em;
     /* max-width: 400px; */
     z-index: 100;
+}
+.isightclass{
+    max-width: 150px;
+    font-size: 10px;
+    /* max-height: 400px; */
 }
